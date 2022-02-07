@@ -555,6 +555,17 @@ where
                     builder.status_code = Some(otel::StatusCode::Error);
                 }
 
+                let builder_attrs = builder.attributes.get_or_insert(Vec::new());
+                if let Some(filename) = meta.file() {
+                    builder_attrs.push(KeyValue::new("code.filepath", filename.to_owned()));
+                }
+                if let Some(module) = meta.module_path() {
+                    builder_attrs.push(KeyValue::new("code.namespace", module.to_owned()));
+                }
+                if let Some(line) = meta.line() {
+                    builder_attrs.push(KeyValue::new("code.lineno", line as i64));
+                }
+
                 if let Some(ref mut events) = builder.events {
                     events.push(otel_event);
                 } else {
